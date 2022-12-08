@@ -1,5 +1,10 @@
 import React from "react";
 import cities from "../../lib/city.list.json";
+import Head from "next/head";
+import moment from "moment-timezone";
+import TodaysWeather from "../../components/TodaysWeather";
+import HourlyWeather from "../../components/HourlyWeather";
+import WeeklyWeather from "../../components/WeeklyWeather";
 
 // get the city from the json file
 const getCity = (params) => {
@@ -20,34 +25,14 @@ const getCity = (params) => {
   }
 };
 
-const getHourlyWeather = (hourlyData) => {
-  const current = new Date();
+const getHourlyWeather = (hourlyData, timezone) => {
+  const endOfDay = moment().tz(timezone).endOf("day").valueOf();
+  const eodTimeStamp = Math.floor(endOfDay / 1000);
 
-  // get current time
-  current.setHours(current.getHours(), 0, 0, 0);
-  const tomorrow = new Date(current);
-
-  // set tomorrow time
-  tomorrow.setDate(tomorrow.getDate() + 1);
-
-  tomorrow.setHours(0, 0, 0, 0);
-
-  // divide by 1000 to get time in seconds
-
-  const currentTimeStamp = Math.floor(current.getTime() / 1000);
-  const tomorrowTimeStamp = Math.floor(tomorrow.getTime() / 1000);
-
-  const todayData = hourlyData.filter((data) => data.dt < tomorrowTimeStamp);
+  const todayData = hourlyData.filter((data) => data.dt < eodTimeStamp);
 
   return todayData;
 };
-
-// show city data
-function city({ hourlyWeather, currentWeather, dailyWeather }) {
-
-
-  return <div></div>;
-}
 
 export default city;
 
@@ -73,14 +58,38 @@ export async function getServerSideProps(context) {
     };
   }
 
-  const hourlyWeather = getHourlyWeather(data.hourly);
+  const hourlyWeather = getHourlyWeather(data.hourly, data.timezone);
 
   return {
     props: {
       city: city,
+      timezone: data.timezone,
       currentWeather: data.current,
       dailyWeather: data.daily,
       hourlyWeather: hourlyWeather,
     },
   };
+}
+
+// show city data
+function city({ timezone, hourlyWeather, currentWeather, dailyWeather, city }) {
+  return (
+    <div>
+      <Head>
+        <title>{city.name} Weather</title>
+      </Head>
+
+      <div className='page-wrapper'>
+        <div className='container'>
+          <TodaysWeather
+            city={city}
+            weather={dailyWeather[0]}
+            timezone={timezone}
+          />
+          <HourlyWeather hourlyWeather={hourlyWeather} timezone={timezone} />
+          <WeeklyWeather WeeklyWeather={dailyWeather} timezone={timezone} />
+        </div>
+      </div>
+    </div>
+  );
 }
