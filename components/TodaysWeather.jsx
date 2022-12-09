@@ -38,7 +38,7 @@ const TodaysWeather = ({ city, weather, timezone }) => {
             <div>
               <Image
                 src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
-                alt='Weather Icon'
+                alt={weather.weather[0].description}
                 fill
               />
             </div>

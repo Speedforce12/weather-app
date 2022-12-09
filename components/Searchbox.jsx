@@ -1,10 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import cities from "../lib/city.list.json";
 import Link from "next/link";
+import Router from "next/router";
 
-const Searchbox = () => {
+const Searchbox = ({ placeholder }) => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
+
+useEffect(() => {
+  const clearQuery = () => setQuery("");
+  Router.events.on("routeChangeComplete", clearQuery);
+
+  return () => {
+    Router.events.off("routeChangeComplete", clearQuery);
+  };
+}, []);
 
   const handleChange = (e) => {
     const { value } = e.target;
@@ -21,8 +31,8 @@ const Searchbox = () => {
         if (match) {
           const cityData = {
             ...city,
-            slug: `${city.name.toLowerCase().replace(/ /g,"-")}-${city.id}`,
-          }
+            slug: `${city.name.toLowerCase().replace(/ /g, "-")}-${city.id}`,
+          };
           matchingCities.push(cityData);
         }
       }
@@ -32,16 +42,21 @@ const Searchbox = () => {
 
   return (
     <div className='search'>
-      <input type='type' value={query} onChange={handleChange} />
+      <input
+        type='type'
+        value={query}
+        onChange={handleChange}
+        placeholder={placeholder ? placeholder : ""}
+      />
 
       {query.length > 3 && (
         <ul className=''>
           {results.length > 0 ? (
             results.map((city) => (
               <li key={city.slug}>
-                <Link href={`location/${city.slug}`}>
+                <Link href={`/location/${city.slug}`}>
                   {city.name}
-                  {city.state ? `, ${city.state}` : ""}
+                  {city.state ? `, ${city.state}` : ""}{" "}
                   <span>({city.country})</span>
                 </Link>
               </li>

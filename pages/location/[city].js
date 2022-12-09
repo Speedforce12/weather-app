@@ -5,6 +5,8 @@ import moment from "moment-timezone";
 import TodaysWeather from "../../components/TodaysWeather";
 import HourlyWeather from "../../components/HourlyWeather";
 import WeeklyWeather from "../../components/WeeklyWeather";
+import Searchbox from "../../components/Searchbox";
+import Link from "next/link";
 
 // get the city from the json file
 const getCity = (params) => {
@@ -81,6 +83,8 @@ function city({ timezone, hourlyWeather, currentWeather, dailyWeather, city }) {
 
       <div className='page-wrapper'>
         <div className='container'>
+          <Link href="/" className="back-link">&larr; Home</Link>
+          <Searchbox placeholder={"Search for another location"} />
           <TodaysWeather
             city={city}
             weather={dailyWeather[0]}
